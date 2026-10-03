@@ -1,0 +1,83 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "panels": [
+    {
+      "title": "Article cache hit ratio",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(hh_cache_hits_total{cache=\"article\"}[5m])) / (sum(rate(hh_cache_hits_total{cache=\"article\"}[5m])) + sum(rate(hh_cache_misses_total{cache=\"article\"}[5m])))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Comment cache hit ratio",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(hh_cache_hits_total{cache=\"comment\"}[5m])) / (sum(rate(hh_cache_hits_total{cache=\"comment\"}[5m])) + sum(rate(hh_cache_misses_total{cache=\"comment\"}[5m])))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Cache hits and misses per second",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "rate(hh_cache_hits_total[1m])",
+          "legendFormat": "hit - {{cache}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(hh_cache_misses_total[1m])",
+          "legendFormat": "miss - {{cache}}",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "happyheadlines",
+    "cache"
+  ],
+  "title": "HappyHeadlines - Cache Hit Ratio",
+  "uid": "happyheadlines-cache",
+  "version": 1
+}
