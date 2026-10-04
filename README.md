@@ -1,197 +1,61 @@
 # HappyHeadlines
 
-Semester project for Development of Large Systems (E2026).
+Project startup instructions in visual code:
 
-This repository contains a small, runnable implementation focused on the compulsory assignment about caching.
+```bash
+docker compose up -d 
+```
 
-## What is implemented
+To start over from scratch:
 
-- `ArticleService` – REST API for articles.
-- `CommentService` – REST API for comments.
-- PostgreSQL – persistence for articles and comments.
-- Redis – separate cache for articles and comments.
-- `ArticleCacheWarmer` – background process that refreshes global articles from the latest 14 days.
-- Comment cache with a maximum of 30 article entries and LRU eviction.
-- Prometheus metrics for cache hits and misses.
-- Grafana dashboard showing cache hit ratios.
-- NGINX load balancer in front of three ArticleService replicas.
-- Docker Compose for the complete local environment.
+```bash
+docker compose down -v
+docker compose up -d 
+```
 
-The implementation intentionally keeps the solution small so the caching requirements can be demonstrated clearly.
+## Services
 
-## Architecture
+* ArticleService (load balanced): http://localhost:8080
+* CommentService: http://localhost:8081
+* Prometheus: http://localhost:9090
+* Grafana: http://localhost:3000
+
+Grafana login:
 
 ```text
-                         +----------------+
-                         |     NGINX      |
-                         | load balancer  |
-                         +-------+--------+
-                                 |
-                    +------------+------------+
-                    |            |            |
-                    v            v            v
-                 Article      Article      Article
-                 Service #1   Service #2   Service #3
-                    |            |            |
-                    +------------+------------+
-                                 |
-                          +------v------+
-                          | Article     |
-                          | Redis       |
-                          +------+------+
-                                 |
-                          +------v------+
-                          | PostgreSQL  |
-                          | Articles    |
-                          +-------------+
-
-Reader -> CommentService -> Comment Redis -> Comment PostgreSQL
-
-                    +----------------------+
-                    | Prometheus -> Grafana|
-                    +----------------------+
+admin / admin
 ```
 
-## Run
+Sometimes the Grafana password needs to be changed 
 
-Requirements:
+## Caching
 
-- Docker Desktop
-- Docker Compose
+* ArticleCache: Redis cache between ArticleService and ArticleDatabase.
+* Article cache is periodically filled with global articles from the latest 14 days.
+* CommentCache: Redis cache between CommentService and CommentDatabase.
+* Comment cache uses cache-aside and keeps the 30 most recently accessed articles using LRU.
+* Cache hits and misses are exposed through Prometheus metrics.
+* Grafana shows the cache hit ratios.
 
-From the repository root:
+## Cache check
 
-```bash
-docker compose up --build -d
-```
-
-Check containers:
-
-```bash
-docker compose ps
-```
-
-Useful URLs:
-
-- Article API: `http://localhost:8080`
-- Comment API: `http://localhost:8081`
-- Prometheus: `http://localhost:9090`
-- Grafana: `http://localhost:3000`
-- Grafana login: `admin` / `admin`
-
-## Article cache
-
-The ArticleCache is warmed in the background every 60 seconds.
-
-Only global articles from the latest 14 days are loaded by the warmer.
-
-Try:
+Article cache:
 
 ```bash
 curl.exe -i http://localhost:8080/api/articles/global
 ```
 
-The response contains:
+Article requests can be inspected using the `X-Cache` response header.
 
-```text
-X-Cache: HIT
-```
-
-or:
-
-```text
-X-Cache: MISS
-```
-
-The first request can be a miss. After the background warmer has run, recent global articles should be cached.
-
-## Comment cache
-
-Create an article first:
-
-```bash
-curl.exe -X POST http://localhost:8080/api/articles ^
-  -H "Content-Type: application/json" ^
-  -d "{\"title\":\"Happy news\",\"content\":\"A positive story\",\"publishedUtc\":\"2026-10-03T10:00:00Z\",\"region\":\"Global\"}"
-```
-
-Then use the returned article ID:
+Comment cache:
 
 ```bash
 curl.exe -i http://localhost:8081/api/comments/article/{ARTICLE_ID}
 ```
 
-The first request should normally be:
+The first request should normally be a `MISS`. Repeating the request should give a `HIT`.
 
-```text
-X-Cache: MISS
-```
+## Documentation
 
-Repeat it:
-
-```bash
-curl.exe -i http://localhost:8081/api/comments/article/{ARTICLE_ID}
-```
-
-The next request should be:
-
-```text
-X-Cache: HIT
-```
-
-## Metrics and dashboard
-
-Prometheus scrapes `/metrics` from the services.
-
-The following counters are exposed:
-
-- `hh_cache_hits_total{cache="article"}`
-- `hh_cache_misses_total{cache="article"}`
-- `hh_cache_hits_total{cache="comment"}`
-- `hh_cache_misses_total{cache="comment"}`
-
-Grafana is provisioned automatically with the dashboard:
-
-**HappyHeadlines - Cache Hit Ratio**
-
-The dashboard shows:
-
-- Article cache hit ratio
-- Comment cache hit ratio
-- Cache hits and misses over time
-
-## Design decisions
-
-### ArticleCache
-
-The assignment requires an offline process to periodically fill the cache with articles from the latest 14 days.
-
-`ArticleCacheWarmer` is implemented as a hosted background service. It runs every 60 seconds and refreshes the Redis cache.
-
-### CommentCache
-
-The comment cache uses cache-aside:
-
-1. Check Redis.
-2. On hit, return the cached comments.
-3. On miss, read PostgreSQL.
-4. Store the result in Redis.
-5. Return the result.
-
-The cache keeps at most 30 article IDs. A Redis sorted set stores the last access time. When more than 30 articles are cached, the oldest entry is removed.
-
-### Failure behaviour
-
-Redis is treated as an optimisation rather than the source of truth.
-
-If Redis is unavailable:
-
-- reads fall back to PostgreSQL;
-- writes continue to PostgreSQL;
-- the client receives the database result rather than a cache error.
-
-This is a fail-open design.
-
-## Scope
-
-The repository is intentionally focused on the compulsory caching assignment. The previous lecture topics are represented in the architecture and documentation where relevant, but unnecessary implementation complexity has been avoided so the cache behaviour can be tested and presented reliably.
+* `docs/architecture.md` – architecture and design decisions
+* `monitoring/grafana/dashboards/happyheadlines-cache.json` – Grafana cache dashboard

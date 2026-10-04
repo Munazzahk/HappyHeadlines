@@ -15,8 +15,8 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(hh_cache_hits_total{cache=\"article\"}[5m])) / (sum(rate(hh_cache_hits_total{cache=\"article\"}[5m])) + sum(rate(hh_cache_misses_total{cache=\"article\"}[5m])))",
-          "refId": "A"
+            "expr": "hh_cache_hits_total{cache=\"article\"} / (hh_cache_hits_total{cache=\"article\"} + hh_cache_misses_total{cache=\"article\"})",
+            "refId": "A"
         }
       ],
       "fieldConfig": {
@@ -37,8 +37,8 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(hh_cache_hits_total{cache=\"comment\"}[5m])) / (sum(rate(hh_cache_hits_total{cache=\"comment\"}[5m])) + sum(rate(hh_cache_misses_total{cache=\"comment\"}[5m])))",
-          "refId": "A"
+            "expr": "hh_cache_hits_total{cache=\"comment\"} / (hh_cache_hits_total{cache=\"comment\"} + hh_cache_misses_total{cache=\"comment\"})",
+            "refId": "A"
         }
       ],
       "fieldConfig": {
@@ -49,26 +49,26 @@
       }
     },
     {
-      "title": "Cache hits and misses per second",
-      "type": "timeseries",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 5
-      },
-      "targets": [
-        {
-          "expr": "rate(hh_cache_hits_total[1m])",
-          "legendFormat": "hit - {{cache}}",
-          "refId": "A"
+        "title": "Cache hits and misses cumulative counters",
+        "type": "timeseries",
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 5
         },
-        {
-          "expr": "rate(hh_cache_misses_total[1m])",
-          "legendFormat": "miss - {{cache}}",
-          "refId": "B"
-        }
-      ]
+        "targets": [
+            {
+                "expr": "hh_cache_hits_total",
+                "legendFormat": "hit - {{cache}}",
+                "refId": "A"
+            },
+            {
+                "expr": "hh_cache_misses_total",
+                "legendFormat": "miss - {{cache}}",
+                "refId": "B"
+            }
+        ]
     }
   ],
   "schemaVersion": 39,

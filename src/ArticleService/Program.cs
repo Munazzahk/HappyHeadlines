@@ -122,7 +122,7 @@ public class ArticleCacheWarmer(IServiceProvider services, ArticleCache cache, I
                 logger.LogError(ex, "Article cache warmer failed");
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
         }
     }
 }
