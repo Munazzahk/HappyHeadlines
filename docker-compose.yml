@@ -15,6 +15,22 @@ services:
       timeout: 3s
       retries: 10
 
+  article-db-europe:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: articles
+      POSTGRES_USER: hh
+      POSTGRES_PASSWORD: hh
+    ports:
+      - "5435:5432"
+    volumes:
+      - article-europe-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hh -d articles"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   comment-db:
     image: postgres:16-alpine
     environment:
@@ -45,11 +61,15 @@ services:
     build:
       context: ./src/ArticleService
     environment:
-      ConnectionStrings__Articles: Host=article-db;Port=5432;Database=articles;Username=hh;Password=hh
+      ConnectionStrings__ArticlesGlobal: Host=article-db;Port=5432;Database=articles;Username=hh;Password=hh
+      ConnectionStrings__ArticlesEurope: Host=article-db-europe;Port=5432;Database=articles;Username=hh;Password=hh
       Redis__Connection: article-cache:6379
       INSTANCE_ID: article-1
+      SEED_DATA: "true"
     depends_on:
       article-db:
+        condition: service_healthy
+      article-db-europe:
         condition: service_healthy
       article-cache:
         condition: service_started
@@ -58,11 +78,15 @@ services:
     build:
       context: ./src/ArticleService
     environment:
-      ConnectionStrings__Articles: Host=article-db;Port=5432;Database=articles;Username=hh;Password=hh
+      ConnectionStrings__ArticlesGlobal: Host=article-db;Port=5432;Database=articles;Username=hh;Password=hh
+      ConnectionStrings__ArticlesEurope: Host=article-db-europe;Port=5432;Database=articles;Username=hh;Password=hh
       Redis__Connection: article-cache:6379
       INSTANCE_ID: article-2
+      SEED_DATA: "false"
     depends_on:
       article-db:
+        condition: service_healthy
+      article-db-europe:
         condition: service_healthy
       article-cache:
         condition: service_started
@@ -71,11 +95,15 @@ services:
     build:
       context: ./src/ArticleService
     environment:
-      ConnectionStrings__Articles: Host=article-db;Port=5432;Database=articles;Username=hh;Password=hh
+      ConnectionStrings__ArticlesGlobal: Host=article-db;Port=5432;Database=articles;Username=hh;Password=hh
+      ConnectionStrings__ArticlesEurope: Host=article-db-europe;Port=5432;Database=articles;Username=hh;Password=hh
       Redis__Connection: article-cache:6379
       INSTANCE_ID: article-3
+      SEED_DATA: "false"  
     depends_on:
       article-db:
+        condition: service_healthy
+      article-db-europe:
         condition: service_healthy
       article-cache:
         condition: service_started
@@ -104,6 +132,14 @@ services:
         condition: service_healthy
       comment-cache:
         condition: service_started
+      profanity-service:
+        condition: service_started
+    
+  profanity-service:
+    build:
+      context: ./src/ProfanityService
+    ports:
+      - "8082:8080"
 
   prometheus:
     image: prom/prometheus:v2.54.1
@@ -136,3 +172,4 @@ volumes:
   article-db-data:
   comment-db-data:
   grafana-data:
+  article-europe-db-data:

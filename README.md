@@ -59,3 +59,15 @@ The first request should normally be a `MISS`. Repeating the request should give
 
 * `docs/architecture.md` – architecture and design decisions
 * `monitoring/grafana/dashboards/happyheadlines-cache.json` – Grafana cache dashboard
+
+
+# Used commands for demo 
+All articles: curl.exe http://localhost:8080/api/articles/global
+
+Specific article: curl.exe http://localhost:8080/api/articles/article/{ARTICLE_ID}
+
+Check article cache: docker compose exec article-cache redis-cli KEYS "*"
+
+Comment check: curl.exe -i http://localhost:8081/api/comments/article/b4657958-a922-4d39-a216-a0be17e46671
+
+Check comment cache: docker compose exec comment-cache redis-cli KEYS "*"
