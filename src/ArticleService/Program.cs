@@ -69,6 +69,7 @@ foreach (var region in coordinator.GetRegions())
 }
 
 app.UseRouting();
+app.UseHttpMetrics();
 app.MapControllers();
 app.MapMetrics();
 

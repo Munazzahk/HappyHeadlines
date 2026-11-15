@@ -141,6 +141,25 @@ services:
     ports:
       - "8082:8080"
 
+  
+  subscriber-service:
+    build:
+      context: ./src/SubscriberService
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+
+  newsletter-service:
+    build:
+      context: ./src/NewsletterService
+    ports:
+      - "8083:8080"
+    environment:
+      Features__SubscriberServiceEnabled: "false"
+      Services__SubscriberServiceUrl: http://subscriber-service:8080
+    depends_on:
+      - subscriber-service
+
+
   prometheus:
     image: prom/prometheus:v2.54.1
     ports:
@@ -152,6 +171,9 @@ services:
       - article-service-2
       - article-service-3
       - comment-service
+      - profanity-service
+      - newsletter-service
+      - subscriber-service
 
   grafana:
     image: grafana/grafana:11.2.0

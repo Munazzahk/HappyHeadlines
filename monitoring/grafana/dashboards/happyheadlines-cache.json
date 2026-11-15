@@ -15,8 +15,8 @@
       },
       "targets": [
         {
-            "expr": "hh_cache_hits_total{cache=\"article\"} / (hh_cache_hits_total{cache=\"article\"} + hh_cache_misses_total{cache=\"article\"})",
-            "refId": "A"
+          "expr": "hh_cache_hits_total{cache=\"article\"} / (hh_cache_hits_total{cache=\"article\"} + hh_cache_misses_total{cache=\"article\"})",
+          "refId": "A"
         }
       ],
       "fieldConfig": {
@@ -37,8 +37,8 @@
       },
       "targets": [
         {
-            "expr": "hh_cache_hits_total{cache=\"comment\"} / (hh_cache_hits_total{cache=\"comment\"} + hh_cache_misses_total{cache=\"comment\"})",
-            "refId": "A"
+          "expr": "hh_cache_hits_total{cache=\"comment\"} / (hh_cache_hits_total{cache=\"comment\"} + hh_cache_misses_total{cache=\"comment\"})",
+          "refId": "A"
         }
       ],
       "fieldConfig": {
@@ -49,26 +49,26 @@
       }
     },
     {
-        "title": "Cache hits and misses cumulative counters",
-        "type": "timeseries",
-        "gridPos": {
-            "h": 8,
-            "w": 24,
-            "x": 0,
-            "y": 5
+      "title": "Cache hits and misses cumulative counters",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "hh_cache_hits_total",
+          "legendFormat": "hit - {{cache}}",
+          "refId": "A"
         },
-        "targets": [
-            {
-                "expr": "hh_cache_hits_total",
-                "legendFormat": "hit - {{cache}}",
-                "refId": "A"
-            },
-            {
-                "expr": "hh_cache_misses_total",
-                "legendFormat": "miss - {{cache}}",
-                "refId": "B"
-            }
-        ]
+        {
+          "expr": "hh_cache_misses_total",
+          "legendFormat": "miss - {{cache}}",
+          "refId": "B"
+        }
+      ]
     }
   ],
   "schemaVersion": 39,

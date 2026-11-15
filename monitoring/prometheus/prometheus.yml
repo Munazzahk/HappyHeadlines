@@ -1,23 +1,33 @@
+
 global:
   scrape_interval: 5s
+  evaluation_interval: 5s
 
 scrape_configs:
   - job_name: article-service-1
-    metrics_path: /metrics
     static_configs:
       - targets: ["article-service-1:8080"]
 
   - job_name: article-service-2
-    metrics_path: /metrics
     static_configs:
       - targets: ["article-service-2:8080"]
 
   - job_name: article-service-3
-    metrics_path: /metrics
     static_configs:
       - targets: ["article-service-3:8080"]
 
   - job_name: comment-service
-    metrics_path: /metrics
     static_configs:
       - targets: ["comment-service:8080"]
+
+  - job_name: profanity-service
+    static_configs:
+      - targets: ["profanity-service:8080"]
+
+  - job_name: newsletter-service
+    static_configs:
+      - targets: ["newsletter-service:8080"]
+
+  - job_name: subscriber-service
+    static_configs:
+      - targets: ["subscriber-service:8080"]

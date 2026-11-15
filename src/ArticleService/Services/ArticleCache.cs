@@ -21,6 +21,12 @@ public class ArticleCache(IConnectionMultiplexer redis)
             "Cache misses.",
             new CounterConfiguration { LabelNames = ["cache"] });
 
+    private static readonly Counter.Child ArticleHits =
+    Hits.WithLabels("article");
+
+    private static readonly Counter.Child ArticleMisses =
+        Misses.WithLabels("article");
+
     private static string Key(Guid id) => $"article:{id}";
 
     public async Task<Article?> Get(Guid id)
@@ -31,17 +37,17 @@ public class ArticleCache(IConnectionMultiplexer redis)
 
             if (value.HasValue)
             {
-                Hits.WithLabels("article").Inc();
+                ArticleHits.Inc();
 
                 return JsonSerializer.Deserialize<Article>(value!);
             }
 
-            Misses.WithLabels("article").Inc();
+            ArticleMisses.Inc();
             return null;
         }
         catch
         {
-            Misses.WithLabels("article").Inc();
+            ArticleMisses.Inc();
             return null;
         }
     }

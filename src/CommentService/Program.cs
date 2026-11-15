@@ -50,7 +50,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseRouting();
-
+app.UseHttpMetrics();
 app.MapControllers();
 app.MapMetrics();
 
