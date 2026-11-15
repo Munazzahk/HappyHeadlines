@@ -32,6 +32,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set lowercase image owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -48,5 +51,5 @@ jobs:
           context: ./src/${{ matrix.service }}
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/happyheadlines-${{ matrix.image }}:latest
-            ghcr.io/${{ github.repository_owner }}/happyheadlines-${{ matrix.image }}:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LC }}/happyheadlines-${{ matrix.image }}:latest
+            ghcr.io/${{ env.OWNER_LC }}/happyheadlines-${{ matrix.image }}:${{ github.sha }}
