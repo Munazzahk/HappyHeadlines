@@ -4,8 +4,20 @@ using CommentService.Services;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
 using StackExchange.Redis;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
+// Distributed tracing with OpenTelemetry and Zipkin
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("comment-service"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddZipkinExporter(options =>
+        {
+            options.Endpoint = new Uri("http://zipkin:9411/api/v2/spans");
+        }));
 
 // Database connection
 var connectionString =

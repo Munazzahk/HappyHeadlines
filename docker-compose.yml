@@ -189,6 +189,12 @@ services:
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
+  
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: happyheadlines-zipkin
+    ports:
+      - "9411:9411"
 
 volumes:
   article-db-data:
